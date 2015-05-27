@@ -33,8 +33,6 @@ class Connect {
 
         }
 
-        System.out.println("PostgreSQL JDBC Driver Registered!");
-
         Connection connection = null;
 
         try {
@@ -48,7 +46,7 @@ class Connect {
         try {
 
             if (connection != null) {
-                System.out.println("You made it, take control your database now!");
+             //   System.out.println("You made it, take control your database now!");
             } else {
                 System.out.println("Failed to make connection!");
             }
@@ -78,23 +76,20 @@ class Connect {
         PreparedStatement statement_pocket_upd = null;
 
         String SQL_Begin_fly = "BEGIN;\n"
-                + "INSERT INTO first (fly_id , _from , _to, price) VALUES (3 , 'KYiv' , 'Lviv' , 50 );\n"
+                + "INSERT INTO first (fly_id , _from , _to, price) VALUES (5 , 'KYiv' , 'Lviv' , 50 );\n"
                 + "PREPARE TRANSACTION 'foobar_fly' ;";
 
         String SQL_Commit_fly = "COMMIT PREPARED 'foobar_fly';";
 
         String SQL_Begin_hotel = "BEGIN;\n"
-                + "INSERT INTO main (_id , _city , price) VALUES ( 3 , 'Lviv' , 120);\n"
+                + "INSERT INTO main (_id , _city , price) VALUES (5 , 'Lviv' , 120);\n"
                 + "PREPARE TRANSACTION 'foobar_hotel' ;";
         String SQL_Commit_hotel = "COMMIT PREPARED 'foobar_hotel';";
         String SQL_Rollback_hotel = "ROLLBACK PREPARED 'foobar_hotel';";
         String SQL_Rollback_fly = "ROLLBACK PREPARED 'foobar_fly';";
+
         String SQL_getFromPocket = "SELECT  price from pocket where id = 1";
-        String SQL_updatePocket = "BEGIN;\n"
-                + "UPDATE pocket SET  price = ? where id = 1"
-                + "PREPARE TRANSACTION 'foobar_pocket' ;";
-        String SQL_Commit_Pocket = "COMMIT PREPARED 'foobar_pocket';";
-        String SQL_Rollback_Pocket = "ROLLBACK PREPARED 'foobar_pocket';";
+        String SQL_updatePocket = " UPDATE pocket SET  price = ? where id = 1";
 
         try {
             //------------------------CONNECTION--------------------------------
@@ -105,44 +100,40 @@ class Connect {
             statement_hotel = dbConnection_hotel.createStatement();
 
             dbConnection_pocket = getDBConnection(url_pocket, user_1, pass_1);
-            //statement_pocket = dbConnection_pocket.createStatement();
+            statement_pocket = dbConnection_pocket.createStatement();
             //------------------------------------------------------------------
 
             statement_fly.execute(SQL_Begin_fly);
             statement_hotel.execute(SQL_Begin_hotel);
             System.out.println("Record is inserted into DBUSER table!");
 
-            
             ResultSet rs = statement_pocket.executeQuery(SQL_getFromPocket);
             while (rs.next()) {
                 user_amount = rs.getInt("price");
-                System.out.println("price = " + user_amount);
+                System.out.println("price before = " + user_amount);
             }
             //----------------------------buy_a ticket--------------------------
             user_amount = user_amount - price_fly;
-           //---------------------buy_a_hotel-----------------------------------
+            //---------------------buy_a_hotel-----------------------------------
             user_amount = user_amount - price_hotel;
-            //---------------------chrck_inesrt-----------------------------------
+            //---------------------check_inesrt-----------------------------------
             statement_pocket_upd = dbConnection_pocket.prepareStatement(SQL_updatePocket);
             statement_pocket_upd.setInt(1, user_amount);
             statement_pocket_upd.executeUpdate();
+            System.out.println("price after = " + user_amount);
 
             statement_fly.execute(SQL_Commit_fly);
             System.out.println("Commit FLY!");
             statement_hotel.execute(SQL_Commit_hotel);
-            System.out.println("Commit HOTEL");
-            statement_pocket_upd.execute(SQL_Commit_Pocket);
-            System.out.println("Commit pocket");
+            System.out.println("Commit HOTEL!");
 
         } catch (SQLException e) {
-
+            e.printStackTrace();
             statement_fly.execute(SQL_Rollback_fly);
             System.out.println("Rollback fly ");
             statement_hotel.execute(SQL_Rollback_hotel);
             System.out.println("Rollback hotel");
-            statement_pocket.execute(SQL_Rollback_Pocket);
-            System.out.println("Rollback Pocket");
-            e.printStackTrace();
+
 
         } finally {
 
@@ -152,12 +143,22 @@ class Connect {
             if (statement_hotel != null) {
                 statement_hotel.close();
             }
+            if (statement_pocket_upd != null) {
+                statement_pocket_upd.close();
+            }
+            
+            if (statement_pocket != null) {
+                statement_pocket.close();
+            }
 
             if (dbConnection_fly != null) {
                 dbConnection_fly.close();
             }
             if (dbConnection_hotel != null) {
                 dbConnection_hotel.close();
+            }
+            if (dbConnection_pocket != null) {
+                dbConnection_pocket.close();
             }
 
         }
