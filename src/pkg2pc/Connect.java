@@ -105,42 +105,34 @@ class Connect {
             statement_hotel = dbConnection_hotel.createStatement();
 
             dbConnection_pocket = getDBConnection(url_pocket, user_1, pass_1);
-            statement_pocket = dbConnection_pocket.createStatement();
+            //statement_pocket = dbConnection_pocket.createStatement();
             //------------------------------------------------------------------
 
             statement_fly.execute(SQL_Begin_fly);
             statement_hotel.execute(SQL_Begin_hotel);
             System.out.println("Record is inserted into DBUSER table!");
 
-             //----------------------------buy_a ticket--------------------------
+            
             ResultSet rs = statement_pocket.executeQuery(SQL_getFromPocket);
             while (rs.next()) {
                 user_amount = rs.getInt("price");
                 System.out.println("price = " + user_amount);
             }
+            //----------------------------buy_a ticket--------------------------
             user_amount = user_amount - price_fly;
+           //---------------------buy_a_hotel-----------------------------------
+            user_amount = user_amount - price_hotel;
+            //---------------------chrck_inesrt-----------------------------------
             statement_pocket_upd = dbConnection_pocket.prepareStatement(SQL_updatePocket);
             statement_pocket_upd.setInt(1, user_amount);
             statement_pocket_upd.executeUpdate();
 
             statement_fly.execute(SQL_Commit_fly);
             System.out.println("Commit FLY!");
-               //-----------------------------------------
-
-            //---------------------buy_a_hotel----------------------------------
-            ResultSet rs1 = statement_pocket.executeQuery(SQL_getFromPocket);
-            while (rs1.next()) {
-                user_amount = rs1.getInt("price");
-                System.out.println("price = " + user_amount);
-            }
-            user_amount = user_amount - price_hotel;
-            statement_pocket_upd = dbConnection_pocket.prepareStatement(SQL_updatePocket);
-            statement_pocket_upd.setInt(1, user_amount);
-            statement_pocket_upd.executeUpdate();
-
-            //--------------------------------------------------------------
             statement_hotel.execute(SQL_Commit_hotel);
             System.out.println("Commit HOTEL");
+            statement_pocket_upd.execute(SQL_Commit_Pocket);
+            System.out.println("Commit pocket");
 
         } catch (SQLException e) {
 
