@@ -120,7 +120,7 @@ class Connect {
             statement_pocket_upd = dbConnection_pocket.prepareStatement(SQL_updatePocket);
             statement_pocket_upd.setInt(1, user_amount);
             statement_pocket_upd.executeUpdate();
-            System.out.println("price after = " + user_amount);
+            //System.out.println("price after = " + user_amount);
 
             statement_fly.execute(SQL_Commit_fly);
             System.out.println("Commit FLY!");
